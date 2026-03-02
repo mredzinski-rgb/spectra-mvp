@@ -1,10 +1,27 @@
 import streamlit as st
 import pandas as pd
-import os  # Dodano import do sprawdzania plików
+import os
+from datetime import datetime
 from modules import market_data
 
+def get_file_info(path):
+    """Pobiera czas ostatniej modyfikacji pliku."""
+    if os.path.exists(path):
+        mtime = os.path.getmtime(path)
+        return datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
+    return None
 
 def show():
+    # --- SEKCJA 0: KOMUNIKAT RYNKOWY (Dynamiczny) ---
+    news_path = "data/news.txt"
+    if os.path.exists(news_path):
+        ts_news = get_file_info(news_path)
+        with open(news_path, "r", encoding="utf-8") as f:
+            content = f.read()
+            if content:
+                # Wyświetlanie komunikatu z datą publikacji
+                st.warning(f"🔔 **KOMUNIKAT RYNKOWY (Opublikowano: {ts_news}):** {content}")
+
     # --- SEKCJA 1: LIVE MARKET FEED ---
     st.markdown("### 📡 LIVE MARKET FEED")
 
@@ -34,28 +51,29 @@ def show():
 
     st.markdown("---")
 
-    # --- SEKCJA 2: RAPORTY PDF (Nowa sekcja) ---
-    # Ta część odpowiada za to, aby PDF wgrany przez Admina był widoczny dla klienta
+    # --- SEKCJA 2: RAPORTY PDF (Z datą publikacji) ---
     st.markdown("### 📑 BLACK STAG INTELLIGENCE")
 
-    report_path = "data/raport.pdf"  # Musi być zgodne z nazwą w admin_panel.py
+    report_path = "data/raport.pdf"
 
     if os.path.exists(report_path):
-        # Wyświetlamy stylowy boks z informacją o raporcie
+        ts_pdf = get_file_info(report_path)
         col_icon, col_text = st.columns([1, 5])
         with col_icon:
             st.markdown("<h1 style='text-align: center;'>📄</h1>", unsafe_allow_html=True)
         with col_text:
             st.write("**Najnowszy Raport Geopolityczny i Analiza FX**")
+            # Wyświetlanie daty publikacji PDF
+            st.caption(f"Opublikowano: {ts_pdf}")
             st.write("Raport przygotowany przez zespół Black Stag Intelligence.")
 
             with open(report_path, "rb") as f:
                 st.download_button(
                     label="POBIERZ AKTUALNY RAPORT (PDF)",
                     data=f,
-                    file_name="Black_Stag_Spectra_Report.pdf",
+                    file_name=f"Black_Stag_Report_{ts_pdf.replace(':', '-')}.pdf",
                     mime="application/pdf",
-                    type="primary"  # Wyróżniony przycisk
+                    type="primary"
                 )
     else:
         st.info("Oczekiwanie na publikację dzisiejszego raportu geopolitycznego.")
