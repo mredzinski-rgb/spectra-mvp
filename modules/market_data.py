@@ -23,16 +23,19 @@ def get_live_rates():
 
 
 def get_chart_of_day(pair_name):
-    # Mapowanie nazw na tickery
-    ticker_map = {"EUR/PLN": "EURPLN=X", "USD/PLN": "USDPLN=X"}
+    ticker_map = {"EUR/PLN": "EURPLN=X", "USD/PLN": "USDPLN=X", "GBP/PLN": "GBPPLN=X"}
     ticker = ticker_map.get(pair_name, "EURPLN=X")
 
-    # Pobieramy dane 1-godzinne z ostatnich 7 dni (bardziej stabilne niż 15m)
+    # Zmieniamy na 1h – to gwarantuje, że wykres nie będzie pusty
     df = yf.download(ticker, period="7d", interval="1h", progress=False)
-    if df.empty: return None
 
-    fig = go.Figure(
-        data=[go.Candlestick(x=df.index, open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'])])
+    if df.empty:
+        return None
+
+    fig = go.Figure(data=[go.Candlestick(
+        x=df.index, open=df['Open'], high=df['High'],
+        low=df['Low'], close=df['Close']
+    )])
     fig.update_layout(template="plotly_dark", height=350, margin=dict(l=0, r=0, t=0, b=0),
                       xaxis_rangeslider_visible=False)
     return fig

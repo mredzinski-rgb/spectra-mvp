@@ -1,21 +1,27 @@
+import smtplib
+import ssl
+from email.message import EmailMessage
 import streamlit as st
 
 def send_notification(subject, body):
-    # Na MVP: Wyświetlamy sukces i logujemy do konsoli.
-    # Docelowo tutaj wstawisz kod SMTP (Gmail/Outlook).
-    st.success("Twoje zgłoszenie zostało wysłane do FX Dealera. Oddzwonimy w ciągu 15 minut.")
-    print(f"POWIADOMIENIE: {subject}\nTreść: {body}")
+    try:
+        # Pobieranie danych z secrets.toml
+        login_user = st.secrets["email"]["user"]
+        app_password = st.secrets["email"]["password"]
+        from_alias = st.secrets["email"]["alias"]
+        to_admin = st.secrets["email"]["receiver"]
 
-def counterparty_form():
-    st.subheader("🕵️ Sprawdź Kontrahenta")
-    st.info("Zlec badanie wiarygodności swojego partnera biznesowego przed transakcją.")
-    with st.form("kyc_request"):
-        name = st.text_input("Nazwa firmy")
-        nip = st.text_input("NIP / KRS")
-        details = st.text_area("Dodatkowe informacje (np. kraj rejestracji)")
-        if st.form_submit_button("Wyślij zapytanie o wycenę"):
-            send_notification(f"ZLECENIE KYC: {name}", f"NIP: {nip}\nSzczegóły: {details}")
+        msg = EmailMessage()
+        msg.set_content(body)
+        msg['Subject'] = f"SPECTRA SYSTEM: {subject}"
+        msg['From'] = from_alias # Klient widzi alias spectra@
+        msg['To'] = to_admin
 
-def dealer_contact_button():
-    if st.sidebar.button("📞 KONTAKT Z FX DEALEREM"):
-        send_notification("PROŚBA O KONTAKT", "Klient prosi o pilny kontakt telefoniczny.")
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+            server.login(login_user, app_password)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        st.error(f"Błąd wysyłki: {e}")
+        return False

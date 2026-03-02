@@ -6,19 +6,21 @@ import os
 def load_css():
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;700&display=swap');
-        .stApp { background: radial-gradient(circle at center, #0f2027 0%, #203a43 50%, #2c5364 100%); color: #ffffff !important; font-family: 'Roboto', sans-serif; }
+        /* Twoje istniejące style... */
 
-        /* Animacja obrotowa */
-        @keyframes spin { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-        .rotating-logo { 
-            animation: spin 12s infinite linear; 
-            filter: drop-shadow(0 0 20px rgba(100, 255, 218, 0.4));
-            display: block; margin-left: auto; margin-right: auto;
+        /* CZERWONY PRZYCISK KONTAKTU */
+        div.stButton > button:first-child[data-testid="baseButton-secondary"] {
+            background-color: #ff4b4b !important;
+            color: white !important;
+            border: 2px solid #ff4b4b !important;
+            font-weight: bold !important;
+            box-shadow: 0 0 15px rgba(255, 75, 75, 0.4);
         }
-
-        .brand-title-text { font-family: 'Orbitron', sans-serif !important; text-shadow: 0 0 15px rgba(100, 255, 218, 0.8) !important; text-align: center !important; text-transform: uppercase; }
-        .stButton>button { border: 2px solid #64ffda !important; font-family: 'Orbitron', sans-serif; background: rgba(255, 255, 255, 0.05) !important; color: #64ffda !important; width: 100%; }
+        div.stButton > button:first-child[data-testid="baseButton-secondary"]:hover {
+            background-color: #ff3333 !important;
+            box-shadow: 0 0 25px rgba(255, 75, 75, 0.6);
+            color: white !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
