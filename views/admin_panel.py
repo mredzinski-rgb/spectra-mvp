@@ -2,7 +2,6 @@ import streamlit as st
 import os
 from datetime import datetime
 
-
 def get_file_info(path):
     """Pobiera czas ostatniej modyfikacji pliku."""
     if os.path.exists(path):
@@ -10,13 +9,11 @@ def get_file_info(path):
         return datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
     return None
 
-
 def show():
     st.header("🛠️ PANEL ADMINISTRATORA")
 
     # 1. Zabezpieczenie struktury folderów
-    if not os.path.exists("data"):
-        os.makedirs("data")
+    os.makedirs("data", exist_ok=True)
 
     # --- SEKCJA NEWSÓW ---
     with st.expander("Zarządzaj Komunikatem Rynkowym", expanded=True):
@@ -55,7 +52,8 @@ def show():
 
     # --- SEKCJA RAPORTÓW PDF ---
     with st.expander("Zarządzaj Raportami PDF"):
-        pdf_path = "data/daily_report.pdf"
+        # UJEDNOLICONA ŚCIEŻKA - musi być raport.pdf
+        pdf_path = "data/raport.pdf"
 
         # Pobieranie daty publikacji raportu
         pdf_ts = get_file_info(pdf_path)
@@ -79,9 +77,13 @@ def show():
                     st.error("Najpierw wybierz plik PDF z dysku.")
 
         with col4:
+            # Teraz funkcja celuje w poprawny plik raport.pdf
             if os.path.exists(pdf_path):
                 # Przycisk czerwony (secondary) do usuwania
                 if st.button("❌ USUŃ AKTUALNY RAPORT", type="secondary"):
-                    os.remove(pdf_path)
-                    st.success("Raport został usunięty z portalu.")
-                    st.rerun()
+                    try:
+                        os.remove(pdf_path)
+                        st.success("Raport został usunięty z portalu.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Wystąpił błąd podczas usuwania: {e}")
