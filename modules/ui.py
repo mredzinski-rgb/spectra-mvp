@@ -94,7 +94,7 @@ def get_img_as_base64(file_path):
     return base64.b64encode(data).decode()
 
 
-def show_branding(main_title="BLACK STAG SPECTRA", subtitle="OPERATIONS CENTER"):
+def show_branding(main_title="BLACK STAG SPECTRA", subtitle="GLOBAL INTELLIGENCE SYSTEM"):
     """Wyświetla animowane logo i stylizowane nagłówki."""
     img_path = os.path.join("assets", "logo.png")
     img_base64 = get_img_as_base64(img_path)
