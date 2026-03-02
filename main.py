@@ -1,10 +1,10 @@
 import streamlit as st
 import os
-from modules import ui, market_data
+from modules import ui, market_data, mailer  # Dodano moduł mailer do obsługi wysyłek
 from views import dashboard, admin_panel
 
 # 1. KONFIGURACJA WIZUALNA
-ui.load_css()  # Wczytuje Twoje niestandardowe style CSS i animacje
+ui.load_css()  # Wczytuje style CSS, w tym definicję czerwonego przycisku
 
 if "auth" not in st.session_state:
     st.session_state.auth = False
@@ -14,59 +14,61 @@ if "auth" not in st.session_state:
 #               EKRAN PUBLICZNY (Auth & KYC)
 # =================================================
 if not st.session_state.auth:
-    ui.show_branding()  # Wyświetla obracające się logo
+    ui.show_branding()  # Wyświetla obracające się logo Spectra
 
-    # Punkt 2: Zakładka logowania i rozbudowana rejestracja
     tab_login, tab_reg = st.tabs(["Logowanie", "Rejestracja Nowego Klienta (KYC)"])
 
     with tab_login:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             st.markdown("### PANEL DOSTĘPU")
-            user = st.text_input("Operator ID")
-            pw = st.text_input("Access Code", type="password")
+            user_input = st.text_input("Operator ID")
+            pw_input = st.text_input("Access Code", type="password")
 
             if st.button("AUTHORIZE"):
-                # Punkt 1: Naprawa logowania - ujednolicenie haseł
-                # Sprawdza hasła z secrets.toml lub używa fallbacku
+                # Pobieranie haseł z secrets.toml lub fallback
                 try:
                     admin_pass = st.secrets["passwords"]["admin"]
                     klient_pass = st.secrets["passwords"]["klient"]
                 except:
                     admin_pass, klient_pass = "BlackStag2026!", "SpectraStart"
 
-                if user == "admin" and pw == admin_pass:
+                if user_input == "admin" and pw_input == admin_pass:
                     st.session_state.auth, st.session_state.role = True, "admin"
                     st.rerun()
-                elif user == "klient" and pw == klient_pass:
+                elif user_input == "klient" and pw_input == klient_pass:
                     st.session_state.auth, st.session_state.role = True, "client"
                     st.rerun()
                 else:
                     st.error("Access Denied: Błędny Operator ID lub Access Code")
 
     with tab_reg:
-        # Punkt 2: Rozbudowany formularz Onboardingowy zgodny ze screenem
         st.subheader("Formularz Onboardingowy KYC")
-        st.info("Wypełnij dane, aby uzyskać dostęp do subskrypcji Spectra i preferencyjnych stawek Keewe.")
+        st.info("Wypełnij dane, aby uzyskać dostęp do subskrypcji Spectra.")
 
         with st.form("reg_form"):
             c1, c2 = st.columns(2)
             with c1:
-                st.text_input("Pełna nazwa firmy")
-                st.text_input("NIP")
-                st.text_input("Email służbowy")
+                comp_name = st.text_input("Pełna nazwa firmy")
+                nip_val = st.text_input("NIP")
+                email_val = st.text_input("Email służbowy")
             with c2:
-                st.selectbox("Roczny obrót FX", ["< 100k EUR", "100k - 1mln EUR", "1-5 mln EUR", "> 5 mln EUR"])
-                st.text_input("Osoba kontaktowa (Imię i Nazwisko)")
-                st.multiselect("Zainteresowanie", ["Black Stag Spectra", "Platforma Keewe", "Audyt FX"])
+                turnover = st.selectbox("Roczny obrót FX", ["< 100k EUR", "100k - 1mln EUR", "1-5 mln EUR", "> 5 mln EUR"])
+                person = st.text_input("Osoba kontaktowa (Imię i Nazwisko)")
+                interest = st.multiselect("Zainteresowanie", ["Black Stag Spectra", "Platforma Keewe", "Audyt FX"])
 
             agree = st.checkbox("Wyrażam zgodę na weryfikację KYC i przetwarzanie danych zgodnie z RODO.")
 
             if st.form_submit_button("Prześlij wniosek"):
-                if agree:
-                    st.success("Wniosek został wysłany do weryfikacji. Skontaktujemy się wkrótce!")
+                if agree and comp_name and email_val:
+                    # Budowanie treści maila KYC
+                    kyc_body = f"Nowe zgłoszenie KYC:\nFirma: {comp_name}\nNIP: {nip_val}\nKontakt: {person} ({email_val})\nObrót: {turnover}\nZainteresowania: {interest}"
+                    if mailer.send_notification("NOWY WNIOSEK KYC", kyc_body):
+                        st.success("Wniosek został wysłany! Skontaktujemy się wkrótce.")
+                    else:
+                        st.error("Błąd wysyłki powiadomienia. Spróbuj ponownie później.")
                 else:
-                    st.error("Proszę zaakceptować zgodę RODO.")
+                    st.error("Proszę wypełnić wymagane pola i zaakceptować zgodę RODO.")
 
 # =================================================
 #               EKRAN OPERACYJNY (Zalogowany)
@@ -75,11 +77,15 @@ else:
     with st.sidebar:
         ui.show_branding("SPECTRA", "LIVE")
 
-        # Punkt 7: Przycisk Kontaktu - zawsze widoczny w sidebarze
         st.markdown("---")
-        if st.button("📞 KONTAKT Z FX DEALEREM"):
-            st.toast("Powiadomienie wysłane do Dealera. Oddzwonimy w ciągu 15 min!")
-            st.info("Status: Oczekiwanie na połączenie z Dealerem...")
+        # Naprawa błędu: 'type' zamiast 'kind' sprawia, że przycisk będzie czerwony (zgodnie z CSS)
+        if st.button("📞 KONTAKT Z FX DEALEREM", type="secondary"):
+            contact_msg = f"Klient {st.session_state.role} prosi o pilny kontakt telefoniczny."
+            if mailer.send_notification("PROŚBA O KONTAKT", contact_msg):
+                st.toast("Powiadomienie wysłane do Dealera!")
+                st.info("Dealer otrzymał zgłoszenie. Czekaj na telefon.")
+            else:
+                st.error("Nie udało się wysłać powiadomienia.")
 
         st.markdown("---")
         menu = ["DASHBOARD", "WERYFIKACJA KONTRAHENTA"]
@@ -95,26 +101,31 @@ else:
 
     # Routing Widoków
     if choice == "DASHBOARD":
-        # Sprawdzenie istnienia newsa przed wyświetleniem (naprawa FileNotFoundError)
         news_path = "data/news.txt"
         if os.path.exists(news_path):
             with open(news_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 if content:
                     st.warning(f"🔔 **KOMUNIKAT RYNKOWY:** {content}")
-        dashboard.show()  # Wywołuje Twój moduł wykresów i kafli
+        dashboard.show()
 
     elif choice == "WERYFIKACJA KONTRAHENTA":
         st.header("🕵️ Weryfikacja Kontrahenta")
-        # Punkt 3: Rozdzielenie linii na Nazwę i ID
         with st.form("kyc_check"):
-            st.text_input("Pełna Nazwa Firmy")
-            st.text_input("Numer ID (NIP / KRS / REGON)")
-            st.selectbox("Kraj rejestracji", ["Polska", "Niemcy", "Wielka Brytania", "Chiny", "USA", "Inne"])
-            st.text_area("Cel badania (np. nawiązanie współpracy, audyt płatności)")
+            target_name = st.text_input("Pełna Nazwa Firmy")
+            target_id = st.text_input("Numer ID (NIP / KRS / REGON)")
+            target_country = st.selectbox("Kraj rejestracji", ["Polska", "Niemcy", "UK", "Chiny", "USA", "Inne"])
+            target_reason = st.text_area("Cel badania")
 
             if st.form_submit_button("Wyślij zapytanie o audyt"):
-                st.success("Zgłoszenie przyjęte. FX Dealer przygotuje wycenę badania.")
+                if target_name and target_id:
+                    audit_body = f"Zlecenie audytu kontrahenta:\nFirma: {target_name}\nID: {target_id}\nKraj: {target_country}\nCel: {target_reason}"
+                    if mailer.send_notification(f"AUDYT: {target_name}", audit_body):
+                        st.success("Zgłoszenie przyjęte. FX Dealer przygotuje wycenę badania.")
+                    else:
+                        st.error("Błąd wysyłki zgłoszenia.")
+                else:
+                    st.error("Podaj nazwę i NIP kontrahenta.")
 
     elif choice == "ADMIN PANEL":
-        admin_panel.show()  # Umożliwia wgranie raportu PDF i edycję newsa
+        admin_panel.show()
