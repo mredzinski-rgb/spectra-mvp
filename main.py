@@ -9,6 +9,7 @@ ui.load_css()  # Wczytuje style CSS, w tym definicję czerwonego przycisku
 if "auth" not in st.session_state:
     st.session_state.auth = False
     st.session_state.role = None
+    st.session_state.user_id = None
 
 # =================================================
 #               EKRAN PUBLICZNY (Auth & KYC)
@@ -26,18 +27,24 @@ if not st.session_state.auth:
             pw_input = st.text_input("Access Code", type="password")
 
             if st.button("AUTHORIZE"):
-                # Pobieranie haseł z secrets.toml lub fallback
+                # 1. Pobieranie haseł z secrets.toml lub fallback
                 try:
                     admin_pass = st.secrets["passwords"]["admin"]
                     klient_pass = st.secrets["passwords"]["klient"]
                 except:
+                    # Logika haseł zgodna z Twoją próbą na screenie
                     admin_pass, klient_pass = "BlackStag2026!", "SpectraStart"
 
+                # 2. Weryfikacja danych i ZAPIS ID UŻYTKOWNIKA do sesji
                 if user_input == "admin" and pw_input == admin_pass:
-                    st.session_state.auth, st.session_state.role = True, "admin"
+                    st.session_state.auth = True
+                    st.session_state.role = "admin"
+                    st.session_state.user_id = user_input  # KLUCZOWA LOGIKA: Zapisujemy login
                     st.rerun()
                 elif user_input == "klient" and pw_input == klient_pass:
-                    st.session_state.auth, st.session_state.role = True, "client"
+                    st.session_state.auth = True
+                    st.session_state.role = "client"
+                    st.session_state.user_id = user_input  # KLUCZOWA LOGIKA: Zapisujemy login
                     st.rerun()
                 else:
                     st.error("Access Denied: Błędny Operator ID lub Access Code")
@@ -78,14 +85,31 @@ else:
         ui.show_branding("SPECTRA", "LIVE")
 
         st.markdown("---")
-        # Naprawa błędu: 'type' zamiast 'kind' sprawia, że przycisk będzie czerwony (zgodnie z CSS)
+
+        # DODATEK: Pole na numer telefonu - klient chętniej go poda tutaj niż przy logowaniu
+        client_phone = st.text_input("Twój numer telefonu (dla Dealera)", placeholder="+48 ...")
+
+        # Przycisk typu 'secondary' (będzie czerwony dzięki Twojemu CSS w ui.py)
         if st.button("📞 KONTAKT Z FX DEALEREM", type="secondary"):
-            contact_msg = f"Klient {st.session_state.role} prosi o pilny kontakt telefoniczny."
-            if mailer.send_notification("PROŚBA O KONTAKT", contact_msg):
+            # Pobieramy konkretny Operator ID zapisany podczas logowania
+            client_id = st.session_state.get('user_id', st.session_state.role)
+
+            # Budujemy profesjonalną treść maila
+            contact_msg = f"""
+                PILNA PROŚBA O KONTAKT (SPECTRA):
+                ---------------------------------
+                Operator ID: {client_id}
+                Numer telefonu: {client_phone if client_phone else 'Nie podano'}
+                Rola w systemie: {st.session_state.role}
+                ---------------------------------
+                Wysłano z: Spectra Operations Center
+                """
+
+            if mailer.send_notification(f"PROŚBA O KONTAKT: {client_id}", contact_msg):
                 st.toast("Powiadomienie wysłane do Dealera!")
-                st.info("Dealer otrzymał zgłoszenie. Czekaj na telefon.")
+                st.success(f"Zgłoszenie wysłane. Oddzwonimy na podany numer.")
             else:
-                st.error("Nie udało się wysłać powiadomienia.")
+                st.error("Błąd połączenia z serwerem pocztowym.")
 
         st.markdown("---")
         menu = ["DASHBOARD", "WERYFIKACJA KONTRAHENTA"]
@@ -96,7 +120,10 @@ else:
 
         st.markdown("---")
         if st.button("TERMINATE SESSION"):
+            # Pełne czyszczenie sesji przy wylogowaniu
             st.session_state.auth = False
+            st.session_state.role = None
+            st.session_state.user_id = None
             st.rerun()
 
     # Routing Widoków
