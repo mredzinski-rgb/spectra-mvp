@@ -1,10 +1,10 @@
 import streamlit as st
 import os
-from modules import ui, market_data, mailer  # Dodano moduł mailer do obsługi wysyłek
+from modules import ui, market_data, mailer
 from views import dashboard, admin_panel
 
 # 1. KONFIGURACJA WIZUALNA
-ui.load_css()  # Wczytuje style CSS, w tym definicję czerwonego przycisku
+ui.load_css()
 
 if "auth" not in st.session_state:
     st.session_state.auth = False
@@ -15,7 +15,7 @@ if "auth" not in st.session_state:
 #               EKRAN PUBLICZNY (Auth & KYC)
 # =================================================
 if not st.session_state.auth:
-    ui.show_branding()  # Wyświetla obracające się logo Spectra
+    ui.show_branding()
 
     tab_login, tab_reg = st.tabs(["Logowanie", "Rejestracja Nowego Klienta (KYC)"])
 
@@ -27,24 +27,21 @@ if not st.session_state.auth:
             pw_input = st.text_input("Access Code", type="password")
 
             if st.button("AUTHORIZE"):
-                # 1. Pobieranie haseł z secrets.toml lub fallback
                 try:
                     admin_pass = st.secrets["passwords"]["admin"]
                     klient_pass = st.secrets["passwords"]["klient"]
                 except:
-                    # Logika haseł zgodna z Twoją próbą na screenie
                     admin_pass, klient_pass = "BlackStag2026!", "SpectraStart"
 
-                # 2. Weryfikacja danych i ZAPIS ID UŻYTKOWNIKA do sesji
                 if user_input == "admin" and pw_input == admin_pass:
                     st.session_state.auth = True
                     st.session_state.role = "admin"
-                    st.session_state.user_id = user_input  # KLUCZOWA LOGIKA: Zapisujemy login
+                    st.session_state.user_id = user_input
                     st.rerun()
                 elif user_input == "klient" and pw_input == klient_pass:
                     st.session_state.auth = True
                     st.session_state.role = "client"
-                    st.session_state.user_id = user_input  # KLUCZOWA LOGIKA: Zapisujemy login
+                    st.session_state.user_id = user_input
                     st.rerun()
                 else:
                     st.error("Access Denied: Błędny Operator ID lub Access Code")
@@ -69,7 +66,6 @@ if not st.session_state.auth:
 
             if st.form_submit_button("Prześlij wniosek"):
                 if agree and comp_name and email_val:
-                    # Budowanie treści maila KYC
                     kyc_body = f"Nowe zgłoszenie KYC:\nFirma: {comp_name}\nNIP: {nip_val}\nKontakt: {person} ({email_val})\nObrót: {turnover}\nZainteresowania: {interest}"
                     if mailer.send_notification("NOWY WNIOSEK KYC", kyc_body):
                         st.success("Wniosek został wysłany! Skontaktujemy się wkrótce.")
@@ -87,15 +83,11 @@ else:
 
         st.markdown("---")
 
-        # DODATEK: Pole na numer telefonu - klient chętniej go poda tutaj niż przy logowaniu
         client_phone = st.text_input("Twój numer telefonu (dla Dealera)", placeholder="+48 ...")
 
-        # Przycisk typu 'secondary' (będzie czerwony dzięki Twojemu CSS w ui.py)
         if st.button("📞 KONTAKT Z FX DEALEREM", type="secondary"):
-            # Pobieramy konkretny Operator ID zapisany podczas logowania
             client_id = st.session_state.get('user_id', st.session_state.role)
 
-            # Budujemy profesjonalną treść maila
             contact_msg = f"""
                 PILNA PROŚBA O KONTAKT (SPECTRA):
                 ---------------------------------
@@ -121,20 +113,15 @@ else:
 
         st.markdown("---")
         if st.button("TERMINATE SESSION"):
-            # Pełne czyszczenie sesji przy wylogowaniu
             st.session_state.auth = False
             st.session_state.role = None
             st.session_state.user_id = None
             st.rerun()
 
-    # Routing Widoków
+    # --- ROUTING WIDOKÓW ---
+
+    # ZMIANA: Usunięto stary blok `if choice == "DASHBOARD":` czytający `news.txt`
     if choice == "DASHBOARD":
-        news_path = "data/news.txt"
-        if os.path.exists(news_path):
-            with open(news_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                if content:
-                    st.warning(f"🔔 **KOMUNIKAT RYNKOWY:** {content}")
         dashboard.show()
 
     elif choice == "WERYFIKACJA KONTRAHENTA":
@@ -145,7 +132,6 @@ else:
             target_country = st.selectbox("Kraj rejestracji", ["Polska", "Niemcy", "UK", "Chiny", "USA", "Inne"])
             target_reason = st.text_area("Cel badania / zgłoszenie dłużnika - opis sprawy")
 
-            # --- ZMIANA: Dodatkowe pole kontaktowe dla zlecenia audytu ---
             user_contact_info = st.text_input("Twój email lub telefon do przesłania wyceny",
                                               placeholder="np. jan.kowalski@firma.pl")
 

@@ -1,6 +1,8 @@
 import streamlit as st
 import os
+import json
 from datetime import datetime
+
 
 def get_file_info(path):
     """Pobiera czas ostatniej modyfikacji pliku."""
@@ -9,46 +11,66 @@ def get_file_info(path):
         return datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
     return None
 
+
 def show():
     st.header("🛠️ PANEL ADMINISTRATORA")
 
     # 1. Zabezpieczenie struktury folderów
     os.makedirs("data", exist_ok=True)
+    news_file = "data/news.json"
+
+    # Wczytywanie istniejących komunikatów z pliku JSON
+    if os.path.exists(news_file):
+        with open(news_file, "r", encoding="utf-8") as f:
+            try:
+                news_list = json.load(f)
+            except json.JSONDecodeError:
+                news_list = []
+    else:
+        news_list = []
 
     # --- SEKCJA NEWSÓW ---
-    with st.expander("Zarządzaj Komunikatem Rynkowym", expanded=True):
-        news_path = "data/news.txt"
-        current_news = ""
+    with st.expander("Zarządzaj Komunikatami Rynkowymi", expanded=True):
+        st.markdown("#### ➕ Dodaj nowy komunikat")
+        title = st.text_input("Tytuł / Nagłówek komunikatu:")
+        content = st.text_area("Treść / Analiza (rozwinięcie):")
 
-        # Pobieranie daty publikacji newsa
-        news_ts = get_file_info(news_path)
-        if news_ts:
-            st.info(f"Ostatnia aktualizacja komunikatu: {news_ts}")
-            with open(news_path, "r", encoding="utf-8") as f:
-                current_news = f.read()
-        else:
-            st.write("Aktualnie brak opublikowanego komunikatu.")
+        if st.button("Publikuj News"):
+            if title and content:
+                new_news = {
+                    "id": datetime.now().strftime("%Y%m%d%H%M%S"),
+                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    "title": title,
+                    "content": content
+                }
+                # Dodajemy najnowszy komunikat na samą górę listy
+                news_list.insert(0, new_news)
 
-        msg = st.text_area("Treść nowego ogłoszenia:", value=current_news)
+                with open(news_file, "w", encoding="utf-8") as f:
+                    json.dump(news_list, f, indent=4)
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Publikuj News"):
-                if msg:
-                    with open(news_path, "w", encoding="utf-8") as f:
-                        f.write(msg)
-                    st.success("Komunikat opublikowany!")
-                    st.rerun()
-                else:
-                    st.warning("Nie możesz opublikować pustego komunikatu.")
+                st.success("Komunikat opublikowany!")
+                st.rerun()
+            else:
+                st.warning("Musisz podać zarówno Tytuł, jak i Treść.")
 
-        with col2:
-            if os.path.exists(news_path):
+        st.markdown("---")
+        st.markdown("#### 📂 Opublikowane komunikaty")
+
+        # Zarządzanie dodanymi newsami (Lista z opcją usuwania)
+        if news_list:
+            for idx, item in enumerate(news_list):
+                col1, col2 = st.columns([4, 1])
+                col1.write(f"**{item['title']}** ({item['date']})")
+
                 # Przycisk czerwony (secondary) do usuwania
-                if st.button("❌ USUŃ AKTUALNY NEWS", type="secondary"):
-                    os.remove(news_path)
-                    st.success("Komunikat został usunięty.")
+                if col2.button("Usuń", key=f"del_{item['id']}", type="secondary"):
+                    news_list.pop(idx)
+                    with open(news_file, "w", encoding="utf-8") as f:
+                        json.dump(news_list, f, indent=4)
                     st.rerun()
+        else:
+            st.info("Brak aktywnych komunikatów.")
 
     # --- SEKCJA RAPORTÓW PDF ---
     with st.expander("Zarządzaj Raportami PDF"):

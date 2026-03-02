@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 import os
+import json
 from datetime import datetime
 from modules import market_data
+
 
 def get_file_info(path):
     """Pobiera czas ostatniej modyfikacji pliku."""
@@ -10,6 +12,7 @@ def get_file_info(path):
         mtime = os.path.getmtime(path)
         return datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M")
     return None
+
 
 def show():
     # CSS likwidujący problem pustych marginesów i ucinania kursów do 4.2...
@@ -34,15 +37,23 @@ def show():
     # ====================================================
     with col_news:
         st.markdown("### 🔔 MARKET NEWS")
-        # --- SEKCJA 0: KOMUNIKAT RYNKOWY (Dynamiczny) ---
-        news_path = "data/news.txt"
-        if os.path.exists(news_path):
-            ts_news = get_file_info(news_path)
-            with open(news_path, "r", encoding="utf-8") as f:
-                content = f.read()
-                if content:
-                    # Wyświetlanie komunikatu z datą publikacji
-                    st.warning(f"**Opublikowano: {ts_news}**\n\n{content}")
+        news_file = "data/news.json"
+
+        if os.path.exists(news_file):
+            with open(news_file, "r", encoding="utf-8") as f:
+                try:
+                    news_list = json.load(f)
+                except json.JSONDecodeError:
+                    news_list = []
+
+            if news_list:
+                for item in news_list:
+                    # Rozwijany nagłówek z tytułem
+                    with st.expander(f"📌 {item['title']}"):
+                        st.caption(f"Opublikowano: {item['date']}")
+                        st.write(item['content'])
+            else:
+                st.info("Brak aktywnych komunikatów.")
         else:
             st.info("Brak aktywnych komunikatów.")
 
