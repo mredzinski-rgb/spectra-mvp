@@ -86,22 +86,21 @@ def show():
     c1, c2 = st.columns(2)
 
     with c1:
-        st.markdown("**EUR/PLN - GŁÓWNA PARA**")
+        st.markdown("**EUR/PLN**")
         fig_eur = market_data.get_chart_of_day("EUR/PLN")
         if fig_eur:
             st.plotly_chart(fig_eur, use_container_width=True)
         else:
             st.warning("Brak danych wykresu.")
-        st.caption("Analiza: Trend boczny. Wsparcie na 4.2800 silne.")
+        # USUNIĘTO: st.caption z analizą trendu i wsparcia
 
     with c2:
-        st.markdown("**USD/PLN - DOLAR AMERYKAŃSKI**")
+        st.markdown("**USD/PLN**")
         fig_usd = market_data.get_chart_of_day("USD/PLN")
         if fig_usd:
             st.plotly_chart(fig_usd, use_container_width=True)
         else:
             st.warning("Brak danych wykresu.")
-        st.caption("Analiza: Zależność od danych z USA (Non-Farm Payrolls).")
+        # USUNIĘTO: st.caption z analizą danych makro
 
-    # --- SEKCJA 4: POWIADOMIENIE NA DOLE ---
-    st.info("💡 Black Stag Insight: Zalecamy zwiększenie hedge na EUR do 65% w związku z planowanym posiedzeniem RPP.")
+    # SEKCJA 4 (Powiadomienie z rekomendacją hedge) została całkowicie usunięta
