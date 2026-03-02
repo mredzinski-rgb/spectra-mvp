@@ -60,7 +60,8 @@ if not st.session_state.auth:
                 nip_val = st.text_input("NIP")
                 email_val = st.text_input("Email służbowy")
             with c2:
-                turnover = st.selectbox("Roczny obrót FX", ["< 100k EUR", "100k - 1mln EUR", "1-5 mln EUR", "> 5 mln EUR"])
+                turnover = st.selectbox("Roczny obrót FX",
+                                        ["< 100k EUR", "100k - 1mln EUR", "1-5 mln EUR", "> 5 mln EUR"])
                 person = st.text_input("Osoba kontaktowa (Imię i Nazwisko)")
                 interest = st.multiselect("Zainteresowanie", ["Black Stag Spectra", "Platforma Keewe", "Audyt FX"])
 
@@ -144,9 +145,27 @@ else:
             target_country = st.selectbox("Kraj rejestracji", ["Polska", "Niemcy", "UK", "Chiny", "USA", "Inne"])
             target_reason = st.text_area("Cel badania")
 
+            # --- ZMIANA: Dodatkowe pole kontaktowe dla zlecenia audytu ---
+            user_contact_info = st.text_input("Twój email lub telefon do przesłania wyceny",
+                                              placeholder="np. jan.kowalski@firma.pl")
+
             if st.form_submit_button("Wyślij zapytanie o audyt"):
                 if target_name and target_id:
-                    audit_body = f"Zlecenie audytu kontrahenta:\nFirma: {target_name}\nID: {target_id}\nKraj: {target_country}\nCel: {target_reason}"
+                    client_id = st.session_state.get('user_id', 'Nieznany')
+
+                    audit_body = f"""
+                    ZLECENIE AUDYTU KONTRAHENTA:
+                    ----------------------------
+                    Zleceniodawca (ID): {client_id}
+                    Kontakt zwrotny: {user_contact_info if user_contact_info else 'Nie podano'}
+
+                    DANE KONTRAHENTA:
+                    Nazwa: {target_name}
+                    ID: {target_id}
+                    Kraj: {target_country}
+                    Cel: {target_reason}
+                    ----------------------------
+                    """
                     if mailer.send_notification(f"AUDYT: {target_name}", audit_body):
                         st.success("Zgłoszenie przyjęte. FX Dealer przygotuje wycenę badania.")
                     else:
