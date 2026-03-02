@@ -1,0 +1,9 @@
+streamlit
+streamlit-authenticator
+yfinance
+pandas
+plotly
+fpdf
+email-validator
+openpyxl
+pyyaml

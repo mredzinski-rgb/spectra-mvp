@@ -1,0 +1,10 @@
+BlackStag_PortalSpectra/
+├── main.py                 # Serce systemu (Nawigacja i Auth)
+├── modules/
+│   ├── ui.py               # Wygląd, CSS i Branding
+│   ├── market.py           # Wykresy i dane yfinance
+│   └── mailer.py           # Powiadomienia e-mail (Zapytania klientów)
+├── views/
+│   ├── client_dashboard.py # To co widzi klient
+│   └── admin_panel.py      # Twoje centrum zarządzania
+└── data/                   # Folder na raporty PDF i ogłoszenia
