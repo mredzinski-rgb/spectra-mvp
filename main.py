@@ -138,18 +138,18 @@ else:
         dashboard.show()
 
     elif choice == "WERYFIKACJA KONTRAHENTA":
-        st.header("🕵️ Weryfikacja Kontrahenta")
+        st.header("Weryfikacja Kontrahenta / Zgłoszenie Dłużnika")
         with st.form("kyc_check"):
             target_name = st.text_input("Pełna Nazwa Firmy")
             target_id = st.text_input("Numer ID (NIP / KRS / REGON)")
             target_country = st.selectbox("Kraj rejestracji", ["Polska", "Niemcy", "UK", "Chiny", "USA", "Inne"])
-            target_reason = st.text_area("Cel badania")
+            target_reason = st.text_area("Cel badania / zgłoszenie dłużnika - opis sprawy")
 
             # --- ZMIANA: Dodatkowe pole kontaktowe dla zlecenia audytu ---
             user_contact_info = st.text_input("Twój email lub telefon do przesłania wyceny",
                                               placeholder="np. jan.kowalski@firma.pl")
 
-            if st.form_submit_button("Wyślij zapytanie o audyt"):
+            if st.form_submit_button("Wyślij zapytanie"):
                 if target_name and target_id:
                     client_id = st.session_state.get('user_id', 'Nieznany')
 
