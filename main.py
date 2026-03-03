@@ -28,23 +28,38 @@ if not st.session_state.auth:
 
             if st.button("AUTHORIZE"):
                 try:
-                    admin_pass = st.secrets["passwords"]["admin"]
-                    klient_pass = st.secrets["passwords"]["klient"]
-                except:
-                    admin_pass, klient_pass = "BlackStag2026!", "SpectraStart"
+                    # 1. Pobieramy wszystkie loginy i hasła z chmury
+                    zapisane_konta = st.secrets["passwords"]
 
-                if user_input == "admin" and pw_input == admin_pass:
-                    st.session_state.auth = True
-                    st.session_state.role = "admin"
-                    st.session_state.user_id = user_input
-                    st.rerun()
-                elif user_input == "klient" and pw_input == klient_pass:
-                    st.session_state.auth = True
-                    st.session_state.role = "client"
-                    st.session_state.user_id = user_input
-                    st.rerun()
-                else:
-                    st.error("Access Denied: Błędny Operator ID lub Access Code")
+                    # 2. Sprawdzamy, czy wpisany login istnieje na liscie ORAZ czy haslo sie zgadza
+                    if user_input in zapisane_konta and pw_input == zapisane_konta[user_input]:
+                        st.session_state.auth = True
+                        st.session_state.user_id = user_input
+
+                        # 3. Przydzielamy uprawnienia (tylko "admin" dostaje Panel Admina, reszta to klienci)
+                        if user_input == "admin":
+                            st.session_state.role = "admin"
+                        else:
+                            st.session_state.role = "client"
+
+                        st.rerun()
+                    else:
+                        st.error("Access Denied: Błędny Operator ID lub Access Code")
+
+                except Exception as e:
+                    # Zabezpieczenie na wypadek braku pliku secrets w testach lokalnych
+                    if user_input == "admin" and pw_input == "BlackStag2026!":
+                        st.session_state.auth = True
+                        st.session_state.role = "admin"
+                        st.session_state.user_id = "admin_local"
+                        st.rerun()
+                    elif user_input == "klient" and pw_input == "SpectraStart":
+                        st.session_state.auth = True
+                        st.session_state.role = "client"
+                        st.session_state.user_id = "klient_local"
+                        st.rerun()
+                    else:
+                        st.error("Błąd konfiguracji haseł lub błędne dane logowania.")
 
     with tab_reg:
         st.subheader("Formularz Onboardingowy KYC")
@@ -120,7 +135,6 @@ else:
 
     # --- ROUTING WIDOKÓW ---
 
-    # ZMIANA: Usunięto stary blok `if choice == "DASHBOARD":` czytający `news.txt`
     if choice == "DASHBOARD":
         dashboard.show()
 
