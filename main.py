@@ -48,12 +48,12 @@ if not st.session_state.auth:
 
                 except Exception as e:
                     # Zabezpieczenie na wypadek braku pliku secrets w testach lokalnych
-                    if user_input == "admin" and pw_input == "BlackStag2026!":
+                    if user_input == "admin" and pw_input == "LOKALNY_TEST_ADMIN":
                         st.session_state.auth = True
                         st.session_state.role = "admin"
                         st.session_state.user_id = "admin_local"
                         st.rerun()
-                    elif user_input == "klient" and pw_input == "SpectraStart":
+                    elif user_input == "klient" and pw_input == "LOKALNY_TEST_KLIENT":
                         st.session_state.auth = True
                         st.session_state.role = "client"
                         st.session_state.user_id = "klient_local"
