@@ -7,7 +7,6 @@ from views import dashboard, admin_panel
 st.set_page_config(
     page_title="Black Stag Spectra", # Nazwa w karcie przeglądarki
     page_icon="🦌", # Ikonka jelenia w karcie (favicon)
-    layout="wide", # Opcjonalnie: użyjemy pełnej szerokości ekranu
     initial_sidebar_state="expanded"
 )
 # >>> KONIEC DODANEGO KODU <<<
