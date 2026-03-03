@@ -3,6 +3,15 @@ import os
 from modules import ui, market_data, mailer
 from views import dashboard, admin_panel
 
+# >>> DODANY KOD <<<
+st.set_page_config(
+    page_title="Black Stag Spectra", # Nazwa w karcie przeglądarki
+    page_icon="🦌", # Ikonka jelenia w karcie (favicon)
+    layout="wide", # Opcjonalnie: użyjemy pełnej szerokości ekranu
+    initial_sidebar_state="expanded"
+)
+# >>> KONIEC DODANEGO KODU <<<
+
 # 1. KONFIGURACJA WIZUALNA
 ui.load_css()
 
