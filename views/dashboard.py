@@ -62,7 +62,7 @@ def show():
     # ====================================================
     with col_main:
         # --- SEKCJA 1: LIVE MARKET FEED ---
-        st.markdown("### LIVE MARKET")
+        st.markdown("### LIVE MARKET FEED")
 
         with st.spinner("Pobieranie danych rynkowych..."):
             df_rates = market_data.get_live_rates()
