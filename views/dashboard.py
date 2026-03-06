@@ -49,7 +49,7 @@ def show():
             if news_list:
                 for item in news_list:
                     # Rozwijany nagłówek z tytułem
-                    with st.expander(f"📌 {item['title']}"):
+                    with st.expander(f"🔴 {item['title']}"):
                         st.caption(f"Opublikowano: {item['date']}")
                         st.write(item['content'])
             else:
@@ -62,7 +62,7 @@ def show():
     # ====================================================
     with col_main:
         # --- SEKCJA 1: LIVE MARKET FEED ---
-        st.markdown("### 📡 LIVE MARKET FEED")
+        st.markdown("### LIVE MARKET FEED")
 
         with st.spinner("Pobieranie danych rynkowych..."):
             df_rates = market_data.get_live_rates()
@@ -119,7 +119,7 @@ def show():
         st.markdown("---")
 
         # --- SEKCJA 3: WYKRESY (CURRENCY MONITOR) ---
-        st.markdown("### 📈 CURRENCY MONITOR")
+        st.markdown("### CURRENCY MONITOR")
 
         c1, c2 = st.columns(2)
 
