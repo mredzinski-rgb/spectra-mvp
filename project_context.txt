@@ -1,10 +1,18 @@
-BlackStag_PortalSpectra/
-├── main.py                 # Serce systemu (Nawigacja i Auth)
+mvp_spectra/
+├── .streamlit/
+│   └── config.toml
+├── assets/
+│   └── logo.png
+├── data/
+│   └── sentinel_state.json      <-- NOWE: Tutaj będą się zapisywać Twoje poranne ustawienia z admina
 ├── modules/
-│   ├── ui.py               # Wygląd, CSS i Branding
-│   ├── market.py           # Wykresy i dane yfinance
-│   └── mailer.py           # Powiadomienia e-mail (Zapytania klientów)
+│   ├── mailer.py
+│   ├── market.py
+│   ├── market_data.py
+│   └── ui.py
 ├── views/
-│   ├── client_dashboard.py # To co widzi klient
-│   └── admin_panel.py      # Twoje centrum zarządzania
-└── data/                   # Folder na raporty PDF i ogłoszenia
+│   ├── admin_panel.py           <-- Tu dodamy panel sterowania systemem Sentinel
+│   ├── dashboard.py
+│   └── sentinel_view.py         <-- NOWE: Zakładka dla klienta (Zegar, Newsy, Kalendarz)
+├── main.py                      <-- Tu dodamy nową zakładkę w menu bocznym (Nawigacja)
+└── project_context.txt

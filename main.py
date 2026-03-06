@@ -1,12 +1,12 @@
 import streamlit as st
 import os
 from modules import ui, market_data, mailer
-from views import dashboard, admin_panel
+from views import dashboard, admin_panel, risk_radar  # <-- DODANO: import risk_radar
 
 # >>> DODANY KOD <<<
 st.set_page_config(
-    page_title="Black Stag Spectra", # Nazwa w karcie przeglądarki
-    page_icon="🦌", # Ikonka jelenia w karcie (favicon)
+    page_title="Black Stag Spectra",  # Nazwa w karcie przeglądarki
+    page_icon="🦌",  # Ikonka jelenia w karcie (favicon)
     initial_sidebar_state="expanded"
 )
 # >>> KONIEC DODANEGO KODU <<<
@@ -128,7 +128,9 @@ else:
                 st.error("Błąd połączenia z serwerem pocztowym.")
 
         st.markdown("---")
-        menu = ["DASHBOARD", "WERYFIKACJA KONTRAHENTA"]
+
+        # <-- DODANO: "RISK RADAR" w liście menu
+        menu = ["DASHBOARD", "RISK RADAR", "WERYFIKACJA KONTRAHENTA"]
         if st.session_state.role == "admin":
             menu.append("ADMIN PANEL")
 
@@ -145,6 +147,10 @@ else:
 
     if choice == "DASHBOARD":
         dashboard.show()
+
+    # <-- DODANO: Przekierowanie do widoku Risk Radar
+    elif choice == "RISK RADAR":
+        risk_radar.show()
 
     elif choice == "WERYFIKACJA KONTRAHENTA":
         st.header("Weryfikacja Kontrahenta / Zgłoszenie Dłużnika")
