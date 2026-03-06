@@ -140,7 +140,7 @@ def show():
     # -----------------------------------------------------------
     disclaimer_html = """
     <div style="font-size: 0.75em; color: #888; text-align: justify; margin-top: 40px; border-top: 1px solid #444; padding-top: 15px; line-height: 1.4;">
-        <strong>Nota Prawna / Wyłączenie odpowiedzialności:</strong> Informacje prezentowane na platformie Spectra są dostarczane wyłącznie w celach informacyjnych i edukacyjnych. Nie są one przeznaczone do celów handlowych, nie stanowią wiążącej oferty ani nie mają charakteru doradztwa inwestycyjnego, podatkowego lub prawnego w rozumieniu obowiązujących przepisów KNF i UE. Prezentowany poziom ryzyka jest subiektywną oceną analityczną Black Stag FX opartą na autorskich modelach. Użytkownik podejmuje wszelkie decyzje finansowe na własne ryzyko. Black Stag FX nie ponosi odpowiedzialności za decyzje podjęte na podstawie niniejszego opracowania.
+        <strong>Nota Prawna / Wyłączenie odpowiedzialności:</strong> Informacje i komunikaty prezentowane na platformie Spectra są dostarczane wyłącznie w celach informacyjnych i edukacyjnych. Nie są one przeznaczone do celów handlowych, nie stanowią wiążącej oferty ani nie mają charakteru doradztwa inwestycyjnego, podatkowego lub prawnego w rozumieniu obowiązujących przepisów KNF i UE. Prezentowany poziom ryzyka jest subiektywną oceną analityczną Black Stag FX opartą na autorskich modelach. Użytkownik podejmuje wszelkie decyzje finansowe na własne ryzyko. Black Stag FX nie ponosi odpowiedzialności za decyzje podjęte na podstawie niniejszego opracowania.
     </div>
     """
     st.markdown(disclaimer_html, unsafe_allow_html=True)
