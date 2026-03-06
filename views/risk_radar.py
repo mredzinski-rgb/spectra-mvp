@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 
 
 def show():
-    st.markdown("### 📡 SPECTRA RISK RADAR")
+    st.markdown("### SPECTRA RISK RADAR")
 
     # Wczytywanie danych
     data_path = "data/risk_radar.json"
@@ -70,7 +70,7 @@ def show():
     # -----------------------------------------------------------
     # 2. PORANNY BRIEFING
     # -----------------------------------------------------------
-    st.markdown("#### 📋 PORANNY BRIEFING (Kluczowe wektory)")
+    st.markdown("#### PORANNY BRIEFING (Kluczowe wektory)")
     st.caption(f"Ostatnia aktualizacja: {radar_data.get('date', 'Brak')}")
 
     bullets = radar_data.get("bullets", [])
@@ -89,7 +89,7 @@ def show():
     # -----------------------------------------------------------
     # 3. INTERAKTYWNA MAPA ŚWIATA (GEOPOLITYKA)
     # -----------------------------------------------------------
-    st.markdown("#### 🗺️ RADAR GEOPOLITYCZNY (Aktywne ogniska)")
+    st.markdown("#### RADAR GEOPOLITYCZNY (Aktywne ogniska)")
     hotspots = radar_data.get("hotspots", [])
 
     if hotspots:
